@@ -5,6 +5,10 @@ dist-ssr
 .DS_Store
 .vite
 
+# 本地部署助手（含个人仓库地址，不入库）
+deploy.ps1
+一键部署.cmd
+
 # 编辑器
 .vscode/*
 !.vscode/extensions.json
