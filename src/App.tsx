@@ -5,7 +5,12 @@ import { Header } from './components/Header'
 import { ChevronUpIcon } from './components/Icons'
 import { Keypad } from './components/Keypad'
 import { Toast } from './components/Toast'
-import { DEFAULT_ACTIVE_CODE, getCurrency } from './config/currencies'
+import {
+  DEFAULT_ACTIVE_CODE,
+  PLACEHOLDER_AMOUNT,
+  PLACEHOLDER_ENTRY,
+  getCurrency,
+} from './config/currencies'
 import { useCurrencyList } from './hooks/useCurrencyList'
 import { useNow } from './hooks/useNow'
 import { useOnlineStatus } from './hooks/useOnlineStatus'
@@ -14,15 +19,17 @@ import { useTheme } from './hooks/useTheme'
 import { useToast } from './hooks/useToast'
 import { copyText } from './lib/clipboard'
 import {
+  INITIAL_CALC_STATE,
   applyKey,
   calcValue,
   createCalcState,
   isDivisionByZero,
+  isInitialCalcState,
   pendingLabel,
   type KeypadKey,
 } from './lib/calculator'
 import { convert, missingCodes } from './lib/convert'
-import { formatDraft, formatForCopy, formatUnitRate, numberToDraft } from './lib/format'
+import { formatDraft, formatForCopy, formatUnitRate } from './lib/format'
 import { loadActiveCode, loadDraft, saveActiveCode, saveDraft } from './lib/storage'
 import { STALE_AFTER_MS, formatRateDate, formatUpdatedStatus } from './lib/time'
 import type { CurrencyCode } from './types'
@@ -36,8 +43,16 @@ export default function App() {
   const isOnline = useOnlineStatus()
   const now = useNow()
 
-  const [calc, setCalc] = useState(() => createCalcState(loadDraft()))
+  const [calc, setCalc] = useState(() => {
+    // 上次留下的输入若只剩一个 0，视作没有输入，冷启动仍回到占位态
+    const saved = loadDraft()
+    return createCalcState(saved === '0' ? '' : saved)
+  })
   const draft = calc.entry
+  // 还没输入任何东西时，输入行以灰色的 100 占位，并按 100 换算其余货币
+  const isPlaceholder = isInitialCalcState(calc)
+  const displayDraft = isPlaceholder ? PLACEHOLDER_ENTRY : draft
+  const amount = isPlaceholder ? PLACEHOLDER_AMOUNT : calcValue(calc)
   const [activeCode, setActiveCode] = useState<CurrencyCode>(
     () => loadActiveCode() ?? DEFAULT_ACTIVE_CODE,
   )
@@ -69,34 +84,36 @@ export default function App() {
   // 状态更新函数必须保持纯净（StrictMode 会重复调用），因此提示放在更新之外
   const handleKey = useCallback(
     (key: KeypadKey) => {
-      if (isDivisionByZero(calc, key)) {
+      // 数字与小数点直接覆盖占位值；运算符、等号则要先把占位的 100 变成真实输入，
+      // 否则界面显示 100 却按 0 参与运算。退格与清除保持占位态不变。
+      const base =
+        isPlaceholder && (key.type === 'operator' || key.type === 'equals')
+          ? createCalcState(PLACEHOLDER_ENTRY)
+          : calc
+
+      if (isDivisionByZero(base, key)) {
         showToast('不能除以 0')
         return
       }
-      const next = applyKey(calc, key)
-      if (next.entry === '' && calc.entry !== '' && key.type === 'equals') {
+      const next = applyKey(base, key)
+      if (next.entry === '' && base.entry !== '' && key.type === 'equals') {
         showToast('结果为负数，已归零')
       }
       setCalc(next)
     },
-    [calc, showToast],
+    [calc, isPlaceholder, showToast],
   )
 
   const handleTapRow = useCallback(
     (code: CurrencyCode) => {
       setKeypadOpen(true)
       if (code === activeCode) return
-      // 切换输入货币时把当前换算结果带过去，视觉上是连续的；
-      // 未结算的算式在这里结束，避免跨币种的半截运算产生歧义。
-      const converted = convert(calcValue(calc), activeCode, code, snapshot)
+      // 切换输入货币＝要输一笔新金额，因此归位到灰色的 100 占位，
+      // 第一个数字键即可直接覆盖；未结算的算式也在这里结束。
       setActiveCode(code)
-      setCalc(
-        converted !== null && calc.entry !== ''
-          ? createCalcState(numberToDraft(converted, getCurrency(code).decimals))
-          : createCalcState(calc.entry),
-      )
+      setCalc(INITIAL_CALC_STATE)
     },
-    [activeCode, calc, snapshot],
+    [activeCode],
   )
 
   const handleCopy = useCallback(
@@ -175,8 +192,9 @@ export default function App() {
           codes={codes}
           snapshot={snapshot}
           activeCode={activeCode}
-          draft={draft}
-          amount={calcValue(calc)}
+          draft={displayDraft}
+          isPlaceholder={isPlaceholder}
+          amount={amount}
           pendingText={pendingLabel(calc, formatDraft)}
           isEditing={isEditing}
           canRemove={canRemove}

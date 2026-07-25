@@ -10,6 +10,8 @@ interface CurrencyRowProps {
   amountText: string
   /** 无障碍朗读用的完整金额 */
   amountLabel: string
+  /** 金额是尚未输入时的占位值，显示为灰色 */
+  isPlaceholder: boolean
   /** 未结算的算式提示（仅输入行），例如 "1,200 ×" */
   pendingText: string | null
   isActive: boolean
@@ -32,6 +34,7 @@ export function CurrencyRow({
   currency,
   amountText,
   amountLabel,
+  isPlaceholder,
   pendingText,
   isActive,
   isEditing,
@@ -112,8 +115,8 @@ export function CurrencyRow({
           role="button"
           tabIndex={0}
           aria-label={`${currency.nameZh} ${amountLabel}${
-            isActive ? '，当前输入行，长按可复制' : '，点击切换为输入货币，长按可复制'
-          }`}
+            isPlaceholder ? '（默认值，输入数字即可替换）' : ''
+          }${isActive ? '，当前输入行，长按可复制' : '，点击切换为输入货币，长按可复制'}`}
           onKeyDown={(event) => {
             if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault()
@@ -125,7 +128,10 @@ export function CurrencyRow({
           <div className="row__amount-stack">
             {pendingText && <span className="row__pending">{pendingText}</span>}
             <span className="row__value-line">
-              <span className="row__value" ref={valueRef}>
+              <span
+                className={`row__value${isPlaceholder ? ' row__value--placeholder' : ''}`}
+                ref={valueRef}
+              >
                 {amountText}
               </span>
               {isActive && <span className="row__caret" aria-hidden="true" />}

@@ -438,6 +438,13 @@ ul {
   color: var(--accent);
 }
 
+/* 尚未输入时的占位金额：灰色，提示「按数字即可覆盖」。
+   写成两段选择器是为了压过上面 .row--active .row__value 的高亮色。 */
+.row .row__value--placeholder,
+.row--active .row__value--placeholder {
+  color: var(--text-tertiary);
+}
+
 .row__caret {
   width: 2px;
   height: 1.4em;

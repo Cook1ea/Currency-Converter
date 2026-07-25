@@ -12,6 +12,8 @@ interface CurrencyListProps {
   activeCode: CurrencyCode
   /** 输入行正在显示的原始输入串 */
   draft: string
+  /** draft 是尚未输入时的占位值（显示为灰色） */
+  isPlaceholder: boolean
   /** 输入串对应的数值，用于换算其余货币 */
   amount: number
   /** 未结算的算式提示，例如 "1,200 ×" */
@@ -32,6 +34,7 @@ export function CurrencyList({
   snapshot,
   activeCode,
   draft,
+  isPlaceholder,
   amount,
   pendingText,
   isEditing,
@@ -61,6 +64,7 @@ export function CurrencyList({
               currency={currency}
               amountText={amountText}
               amountLabel={amountText === '—' ? '暂无汇率' : amountText}
+              isPlaceholder={isActive && isPlaceholder}
               pendingText={isActive ? pendingText : null}
               isActive={isActive}
               isEditing={isEditing}

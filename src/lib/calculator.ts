@@ -40,6 +40,14 @@ export function createCalcState(entry: string): CalcState {
   return { entry: sanitizeDraft(entry), pending: null, replaceEntry: false }
 }
 
+/**
+ * 是否处于「什么都还没输入」的初始态。
+ * 界面据此显示灰色占位金额，而不是 0。
+ */
+export function isInitialCalcState(state: CalcState): boolean {
+  return state.entry === '' && state.pending === null && !state.replaceEntry
+}
+
 /** 当前输入串对应的数值。 */
 export function calcValue(state: CalcState): number {
   if (state.entry === '' || state.entry === '.') return 0

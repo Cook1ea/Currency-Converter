@@ -74,6 +74,13 @@ export const DEFAULT_CODES: readonly CurrencyCode[] = [
 /** 列表中默认选中（即默认输入）的货币。 */
 export const DEFAULT_ACTIVE_CODE: CurrencyCode = 'JPY'
 
+/**
+ * 尚未输入时，输入行以灰色占位显示的金额。
+ * 用 100 而不是 0，一打开就能看到有意义的换算结果；按下第一个数字键即被覆盖。
+ */
+export const PLACEHOLDER_AMOUNT = 100
+export const PLACEHOLDER_ENTRY = String(PLACEHOLDER_AMOUNT)
+
 export const MIN_CURRENCIES = 2
 export const MAX_CURRENCIES = 10
 

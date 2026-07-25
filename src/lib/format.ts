@@ -33,8 +33,9 @@ export function draftToNumber(draft: string): number {
 }
 
 /**
- * 数值 -> 原始输入串（用于点击某一行后接着编辑它的换算结果）。
- * 结果必须满足输入串的长度约束，否则后续按键会出现异常。
+ * 数值 -> 原始输入串，结果满足输入串的长度约束。
+ * 目前未被使用：切换货币改为归位到占位金额，不再带入换算结果；
+ * 保留以备将来恢复「接着编辑换算结果」的交互。
  */
 export function numberToDraft(value: number, decimals: number): string {
   if (!Number.isFinite(value) || value === 0) return ''
