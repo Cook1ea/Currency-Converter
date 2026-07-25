@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CurrencyList } from './components/CurrencyList'
 import { CurrencyPicker, type PickerMode } from './components/CurrencyPicker'
 import { Header } from './components/Header'
+import { ChevronUpIcon } from './components/Icons'
 import { Keypad } from './components/Keypad'
 import { Toast } from './components/Toast'
 import { DEFAULT_ACTIVE_CODE, getCurrency } from './config/currencies'
@@ -204,8 +205,14 @@ export default function App() {
 
       {!isEditing && !isKeypadOpen && (
         <footer className="footer footer--collapsed">
-          <button type="button" className="reopen-button" onClick={() => setKeypadOpen(true)}>
-            打开数字键盘
+          <button
+            type="button"
+            className="reopen-button"
+            onClick={() => setKeypadOpen(true)}
+            aria-label="展开数字键盘"
+          >
+            <ChevronUpIcon />
+            <span>数字键盘</span>
           </button>
         </footer>
       )}

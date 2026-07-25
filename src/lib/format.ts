@@ -95,16 +95,3 @@ export function formatUnitRate(rate: number | null): string {
   const decimals = rate >= 1000 ? 2 : pickDecimals(rate, 4, { minSignificant: 4, maxDecimals: 6 })
   return trimTrailingZeros(roundTo(rate, decimals).toFixed(decimals), 2)
 }
-
-/**
- * 根据字符数选择字号，避免大额数字溢出屏幕。
- * 返回 rem 值，配合 CSS 的 clamp 使用。
- */
-export function amountFontSize(text: string): string {
-  const length = text.length
-  if (length <= 9) return '1.75rem'
-  if (length <= 12) return '1.5rem'
-  if (length <= 15) return '1.25rem'
-  if (length <= 19) return '1.05rem'
-  return '0.9rem'
-}

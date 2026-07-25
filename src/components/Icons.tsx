@@ -98,6 +98,22 @@ export function PlusCircleIcon({ className }: IconProps) {
   )
 }
 
+export function ChevronDownIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} width="18" height="18">
+      <path d="M6 9.5l6 6 6-6" />
+    </svg>
+  )
+}
+
+export function ChevronUpIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} width="18" height="18">
+      <path d="M6 14.5l6-6 6 6" />
+    </svg>
+  )
+}
+
 export function CheckIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className} width="18" height="18">

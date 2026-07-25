@@ -183,6 +183,7 @@ export const DEFAULT_ACTIVE_CODE: CurrencyCode = 'JPY'  // 默认输入行
 │   │   ├── useDragReorder.ts      Pointer Events 拖拽排序
 │   │   ├── useLongPress.ts        长按复制
 │   │   ├── useTheme.ts            主题偏好
+│   │   ├── useFitText.ts          金额按实际可用宽度自动缩放字号
 │   │   └── useToast.ts / useNow.ts / useOnlineStatus.ts
 │   ├── lib/                       纯函数工具
 │   │   ├── calculator.ts          四则运算状态机
@@ -212,7 +213,7 @@ export const DEFAULT_ACTIVE_CODE: CurrencyCode = 'JPY'  // 默认输入行
 | 编辑模式下按住右侧 ≡       | 拖动调整顺序；键盘用户可聚焦后按上下方向键       |
 | 键盘 `÷ × − + =`           | 简单四则运算，算完直接作为换算金额               |
 | 键盘 `AC`                  | 一键清空当前输入与未结算的算式                   |
-| 键盘「完成」               | 收起键盘，给列表让出更多空间                     |
+| 键盘右下角 ⌄ / 底部 ⌃ 条   | 收起 / 展开数字键盘。收起后列表可完整显示 10 种货币 |
 
 ## 本地保存了什么
 

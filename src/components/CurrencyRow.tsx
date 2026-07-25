@@ -1,7 +1,7 @@
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { DragHandleIcon, MinusCircleIcon } from './Icons'
+import { useFitText } from '../hooks/useFitText'
 import { useLongPress } from '../hooks/useLongPress'
-import { amountFontSize } from '../lib/format'
 import type { Currency } from '../types'
 
 interface CurrencyRowProps {
@@ -46,6 +46,8 @@ export function CurrencyRow({
   dragHandleProps,
 }: CurrencyRowProps) {
   const amountHandlers = useLongPress(onCopy, onTap, !isEditing)
+  // 金额按实际可用宽度自动缩放，长数字不会被截成省略号
+  const valueRef = useFitText(amountText, '.row__amount')
 
   const className = [
     'row',
@@ -123,7 +125,7 @@ export function CurrencyRow({
           <div className="row__amount-stack">
             {pendingText && <span className="row__pending">{pendingText}</span>}
             <span className="row__value-line">
-              <span className="row__value" style={{ fontSize: amountFontSize(amountText) }}>
+              <span className="row__value" ref={valueRef}>
                 {amountText}
               </span>
               {isActive && <span className="row__caret" aria-hidden="true" />}

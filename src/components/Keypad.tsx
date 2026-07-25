@@ -1,4 +1,4 @@
-import { BackspaceIcon } from './Icons'
+import { BackspaceIcon, ChevronDownIcon } from './Icons'
 import type { KeypadKey, Operator } from '../lib/calculator'
 
 interface KeypadProps {
@@ -18,13 +18,16 @@ const OPERATOR_LABEL: Record<Operator, string> = {
 }
 
 /**
- * 自定义数字键盘，布局对齐手机自带计算器：
+ * 自定义数字键盘。
  *
- *   AC  ⌫  ÷  ×
- *   7   8  9  −
- *   4   5  6  +
- *   1   2  3  =
- *   0   .  完成（占两格）
+ * 5 列 4 行：数字保持计算器的 3 列排布放在左侧，运算与功能键收在右侧两列。
+ * 之所以不用更直觉的 4 列 5 行，是因为在 iPhone 上多出的那一行会把
+ * 货币列表挤到需要滚动才能看全。
+ *
+ *   7   8   9   ⌫   AC
+ *   4   5   6   ÷   ×
+ *   1   2   3   −   +
+ *   [   0   ]   .   =   完成
  */
 export function Keypad({ onKey, onDone, activeCode, activeOperator }: KeypadProps) {
   const digit = (value: string) => (
@@ -56,14 +59,7 @@ export function Keypad({ onKey, onDone, activeCode, activeOperator }: KeypadProp
 
   return (
     <div className="keypad" role="group" aria-label={`${activeCode} 金额数字键盘`}>
-      <button
-        type="button"
-        className="keypad__button keypad__button--muted"
-        onClick={() => onKey({ type: 'clear' })}
-        aria-label="清空金额"
-      >
-        AC
-      </button>
+      {['7', '8', '9'].map(digit)}
       <button
         type="button"
         className="keypad__button keypad__button--muted"
@@ -72,26 +68,31 @@ export function Keypad({ onKey, onDone, activeCode, activeOperator }: KeypadProp
       >
         <BackspaceIcon />
       </button>
+      <button
+        type="button"
+        className="keypad__button keypad__button--muted"
+        onClick={() => onKey({ type: 'clear' })}
+        aria-label="清空金额"
+      >
+        AC
+      </button>
+
+      {['4', '5', '6'].map(digit)}
       {operator('÷')}
       {operator('×')}
 
-      {['7', '8', '9'].map(digit)}
+      {['1', '2', '3'].map(digit)}
       {operator('-')}
-
-      {['4', '5', '6'].map(digit)}
       {operator('+')}
 
-      {['1', '2', '3'].map(digit)}
       <button
         type="button"
-        className="keypad__button keypad__button--operator"
-        onClick={() => onKey({ type: 'equals' })}
-        aria-label="等于"
+        className="keypad__button keypad__button--wide"
+        onClick={() => onKey({ type: 'digit', value: '0' })}
+        aria-label="数字 0"
       >
-        =
+        0
       </button>
-
-      {digit('0')}
       <button
         type="button"
         className="keypad__button"
@@ -102,11 +103,19 @@ export function Keypad({ onKey, onDone, activeCode, activeOperator }: KeypadProp
       </button>
       <button
         type="button"
-        className="keypad__button keypad__button--primary keypad__button--wide"
-        onClick={onDone}
-        aria-label="完成输入，收起键盘"
+        className="keypad__button keypad__button--operator"
+        onClick={() => onKey({ type: 'equals' })}
+        aria-label="等于"
       >
-        完成
+        =
+      </button>
+      <button
+        type="button"
+        className="keypad__button keypad__button--primary"
+        onClick={onDone}
+        aria-label="收起数字键盘"
+      >
+        <ChevronDownIcon />
       </button>
     </div>
   )

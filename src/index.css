@@ -24,7 +24,9 @@
 
   --radius-lg: 16px;
   --radius-md: 12px;
-  --row-height: 62px;
+  /* 行高与键高压得比较紧，目标是 8 种货币 + 键盘在 iPhone 上一屏放得下 */
+  --row-height: 52px;
+  --key-height: 46px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -175,7 +177,7 @@ ul {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: calc(var(--safe-top) + 14px) 16px 12px;
+  padding: calc(var(--safe-top) + 8px) 12px 6px;
   background: var(--bg);
   position: sticky;
   top: 0;
@@ -189,14 +191,14 @@ ul {
 
 .header__title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.3125rem;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
 .header__status {
-  margin: 3px 0 0;
-  font-size: 0.8125rem;
+  margin: 2px 0 0;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   display: flex;
   flex-wrap: wrap;
@@ -218,8 +220,8 @@ ul {
 }
 
 .icon-button {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -262,7 +264,7 @@ ul {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 16px 16px;
+  padding: 0 12px 10px;
 }
 
 .card {
@@ -288,8 +290,8 @@ ul {
   display: flex;
   align-items: center;
   min-height: var(--row-height);
-  padding: 0 14px;
-  gap: 10px;
+  padding: 0 12px;
+  gap: 8px;
   background: var(--surface);
   position: relative;
   overflow: hidden;
@@ -309,7 +311,7 @@ ul {
   content: '';
   position: absolute;
   top: 0;
-  left: 58px;
+  left: 50px;
   right: 0;
   height: 1px;
   background: var(--separator);
@@ -338,9 +340,9 @@ ul {
 .row__identity {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 108px;
-  padding: 10px 6px 10px 0;
+  gap: 9px;
+  min-width: 100px;
+  padding: 6px 6px 6px 0;
   text-align: left;
   border-radius: 10px;
 }
@@ -350,9 +352,9 @@ ul {
 }
 
 .row__flag {
-  font-size: 1.6rem;
+  font-size: 1.45rem;
   line-height: 1;
-  width: 30px;
+  width: 27px;
   text-align: center;
 }
 
@@ -420,14 +422,16 @@ ul {
   max-width: 100%;
 }
 
+/* 字号由 useFitText 按实际可用宽度动态设置，这里只给一个初始值 */
 .row__value {
+  font-size: 1.5rem;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   letter-spacing: -0.01em;
   white-space: nowrap;
+  /* 缩放到最小字号仍放不下时才截断，正常情况下不会触发 */
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: font-size 120ms ease;
 }
 
 .row--active .row__value {
@@ -514,7 +518,7 @@ ul {
 }
 
 .rate-hint {
-  margin-top: 12px;
+  margin-top: 8px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -537,39 +541,46 @@ ul {
 .footer {
   position: sticky;
   bottom: 0;
-  padding: 8px 10px calc(var(--safe-bottom) + 8px);
+  padding: 6px 8px calc(var(--safe-bottom) + 6px);
   background: var(--bg);
   border-top: 1px solid var(--separator);
 }
 
+/* 键盘收起后只留一条窄条，把空间还给货币列表 */
 .footer--collapsed {
-  padding-top: 10px;
-  padding-bottom: calc(var(--safe-bottom) + 10px);
+  padding: 4px 8px calc(var(--safe-bottom) + 4px);
 }
 
 .reopen-button {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   width: 100%;
-  min-height: 44px;
+  min-height: 38px;
   border-radius: var(--radius-md);
   background: var(--surface);
   color: var(--accent);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 500;
+}
+
+.reopen-button:active {
+  background: var(--surface-pressed);
 }
 
 .keypad {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
 }
 
 .keypad__button {
-  min-height: 50px;
+  min-height: var(--key-height);
   border-radius: var(--radius-md);
   background: var(--key-bg);
   box-shadow: var(--key-shadow);
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 400;
   display: flex;
   align-items: center;
@@ -588,7 +599,7 @@ ul {
 
 .keypad__button--muted {
   background: var(--surface-subtle);
-  font-size: 1.125rem;
+  font-size: 1rem;
   box-shadow: none;
 }
 
@@ -608,7 +619,7 @@ ul {
 .keypad__button--primary {
   background: var(--accent);
   color: #ffffff;
-  font-size: 1.0625rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   box-shadow: none;
 }
