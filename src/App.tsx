@@ -58,7 +58,7 @@ export default function App() {
   )
   const [isEditing, setIsEditing] = useState(false)
   const [picker, setPicker] = useState<PickerMode | null>(null)
-  // 键盘可以按「完成」收起，给列表让出更多空间；再次点击任意货币行会重新展开
+  // 键盘可以按「完成」收起，给列表让出更多空间；只能由底部那个按钮重新展开
   const [isKeypadOpen, setKeypadOpen] = useState(true)
 
   // 列表变动后，保证输入行始终指向一个仍然存在的货币
@@ -106,7 +106,7 @@ export default function App() {
 
   const handleTapRow = useCallback(
     (code: CurrencyCode) => {
-      setKeypadOpen(true)
+      // 键盘的收起与展开完全交给底部那个按钮，点货币行不去动它
       if (code === activeCode) return
       // 切换输入货币＝要输一笔新金额，因此归位到灰色的 100 占位，
       // 第一个数字键即可直接覆盖；未结算的算式也在这里结束。
