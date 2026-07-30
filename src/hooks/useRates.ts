@@ -6,7 +6,9 @@ import type { FetchStatus, RateSnapshot } from '../types'
 /** 两次手动刷新之间的最小间隔，防止连点造成重复请求。 */
 export const MIN_REFRESH_INTERVAL_MS = 10_000
 /** 回到前台时，数据超过这个时长才自动刷新。 */
-const AUTO_REFRESH_AFTER_MS = 30 * 60_000
+const AUTO_REFRESH_AFTER_MS = 60_000
+/** 页面可见时的后台轮询间隔，让实时数据源的更新及时反映到界面。 */
+const POLL_INTERVAL_MS = 60_000
 
 export interface UseRatesResult {
   snapshot: RateSnapshot | null
@@ -97,6 +99,16 @@ export function useRates(): UseRatesResult {
       window.removeEventListener('online', onOnline)
     }
   }, [fetchRates, snapshot])
+
+  // 页面可见时按固定间隔轮询，保证实时数据源的更新能及时反映到界面。
+  // 单独用一个 effect、只依赖 fetchRates，避免每次取数成功都重建定时器。
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      void fetchRates()
+    }, POLL_INTERVAL_MS)
+    return () => window.clearInterval(timer)
+  }, [fetchRates])
 
   return {
     snapshot,

@@ -15,7 +15,8 @@ const KEYS = {
   codes: `${PREFIX}codes`,
   activeCode: `${PREFIX}activeCode`,
   draft: `${PREFIX}draft`,
-  snapshot: `${PREFIX}snapshot`,
+  // v2：数据源改为实时汇率后 key 版本升级，避免旧的 ECB 日更快照被当作当前数据显示
+  snapshot: `${PREFIX}snapshot.v2`,
   theme: `${PREFIX}theme`,
 } as const
 
@@ -96,10 +97,14 @@ function validateSnapshot(value: unknown): RateSnapshot | null {
   }
   if (Object.keys(rates).length === 0) return null
 
+  const rateTimestamp =
+    typeof candidate.rateTimestamp === 'number' ? candidate.rateTimestamp : undefined
+
   return {
     base: candidate.base,
     rates,
     rateDate: candidate.rateDate,
+    ...(rateTimestamp !== undefined ? { rateTimestamp } : {}),
     fetchedAt: candidate.fetchedAt,
     provider: candidate.provider,
   }

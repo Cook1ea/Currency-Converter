@@ -24,6 +24,8 @@ export interface RateSnapshot {
   rates: Readonly<Record<CurrencyCode, number>>
   /** 数据源声明的汇率日期（ISO yyyy-mm-dd），即数据本身的时间 */
   rateDate: string
+  /** 数据源声明的具体报价时刻（ms）；仅实时数据源提供，日更数据源留空 */
+  rateTimestamp?: number
   /** 本地成功获取到这份数据的时间戳（ms） */
   fetchedAt: number
   /** 数据源标识，便于日后更换或排查 */

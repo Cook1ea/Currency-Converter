@@ -3,8 +3,9 @@ import type { Currency, CurrencyCode } from '../types'
 /**
  * 统一的货币配置表 —— 全应用唯一的货币信息来源。
  *
- * 这里收录的币种与默认数据源（Frankfurter / ECB 参考汇率）支持的币种保持一致。
- * 若更换数据源并支持更多币种，只需在此追加条目即可，界面与搜索会自动生效。
+ * 这里收录的币种是当前各数据源（FxRatesAPI / Coinbase / Frankfurter）的交集，
+ * 也是 SUPPORTED_CODES 的来源；各 provider 都用它过滤响应，避免展示未配置的币种。
+ * 若要支持更多币种，需确认降级链上的每个数据源都覆盖，再在此追加条目。
  *
  * decimals：日常展示所用的小数位（参考 ISO 4217 minor unit）。
  *   JPY / KRW / ISK 等无辅币单位的货币为 0，其余为 2。
@@ -45,6 +46,13 @@ export const CURRENCIES: readonly Currency[] = [
 const CURRENCY_MAP: ReadonlyMap<CurrencyCode, Currency> = new Map(
   CURRENCIES.map((currency) => [currency.code, currency]),
 )
+
+/**
+ * 应用支持的币种代码集合，供各数据源 provider 共用。
+ * 数据源返回的原始数据可能包含加密货币等大量额外代码（尤其是实时源），
+ * provider 必须用这份白名单过滤，避免未配置名称/国旗的币种进入界面。
+ */
+export const SUPPORTED_CODES: readonly CurrencyCode[] = CURRENCIES.map((c) => c.code)
 
 /** 兜底货币信息：数据源返回了配置表里没有的币种时使用，避免界面崩溃。 */
 function fallbackCurrency(code: CurrencyCode): Currency {

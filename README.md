@@ -67,26 +67,27 @@ GitHub Pages 会把项目部署在 `/<仓库名>/` 下，因此：
 
 ### 使用的 API
 
-默认使用 [Frankfurter](https://frankfurter.dev)（`https://api.frankfurter.dev/v1/latest?base=EUR`，`api.frankfurter.app` 作为备用入口自动重试）。
+数据源是一条自动降级链（`src/api/rates.ts`），逐级尝试，第一个成功的即返回：
 
-- **免费、无需 API Key**，返回 CORS 头，允许浏览器直接访问。
-- 数据来自**欧洲央行（ECB）每日参考汇率**。
+1. [FxRatesAPI](https://fxratesapi.com)（`https://api.fxratesapi.com/latest?base=USD`）—— **分钟级实时中间价**，主数据源。
+2. [Coinbase](https://docs.cdp.coinbase.com/exchange/reference/exchangerestapi_getexchangerates)（`https://api.coinbase.com/v2/exchange-rates?currency=USD`）—— 实时中间价，主源失败或限流时的备用源。
+3. [Frankfurter](https://frankfurter.dev)（`https://api.frankfurter.dev/v1/latest?base=EUR`，`api.frankfurter.app` 备用入口）—— **欧洲央行（ECB）每日参考汇率**，前两者都不可用时的最终兜底。
+
+三个源都**免费、无需 API Key**，均返回 CORS 头，允许浏览器直接访问。
 
 ### 更新频率与限制
 
-- ECB 通常在**欧洲时间工作日 16:00 CET 前后**发布当天的参考汇率，Frankfurter 随之更新。
-- **周末与欧洲银行假日不更新**，此时接口返回的仍是最近一个工作日的汇率，属于正常现象。
-- 覆盖 **30 种主要法定货币**（含基准货币 EUR，见 `src/config/currencies.ts`），**不含加密货币**，也不含 ECB 未收录的币种（如 TWD、VND、RUB）。
-- ECB 的币种列表会随成员国加入欧元区而变化（例如保加利亚 2026 年启用欧元后 BGN 已被移除）。如果某个币种从接口消失，界面会在顶部提示「当前数据源暂不支持：…」，此时把它从 `src/config/currencies.ts` 里删掉即可。
-- 官方未公布硬性速率限制，但本应用仍然做了约束：手动刷新之间至少间隔 10 秒，并发请求会被合并，回到前台时只在数据超过 30 分钟才自动刷新。
-- 这是**参考汇率，不是可成交价**，与银行、信用卡实际结算汇率会有差异。
+- 正常情况下数据每分钟更新一次（由 FxRatesAPI 或 Coinbase 提供）；只有当两者都不可用时才会退回 Frankfurter 的**工作日日更**（欧洲时间 16:00 CET 前后，周末与欧洲银行假日不更新）。
+- 覆盖 **30 种主要法定货币**（见 `src/config/currencies.ts` 的 `SUPPORTED_CODES`），**不含加密货币**；这是三个数据源的交集，各 provider 都会用它过滤响应。
+- FxRatesAPI 未公布硬性速率限制（响应头 `x-ratelimit-limit` 有值但重置窗口未知）；本应用做了约束：手动刷新之间至少间隔 10 秒，页面可见时每 60 秒轮询一次，回到前台时数据超过 60 秒才额外触发一次刷新。
+- 这是**中间价参考汇率，不是可成交价**，与银行、信用卡实际结算汇率会有差异。
 
 ### 应用如何使用这份数据
 
-- 固定以 EUR 为基准拉取整张汇率表，任意两种货币之间在本地做交叉换算，因此切换输入货币不需要重新请求。
-- 每次成功获取都会把快照（汇率、汇率日期、获取时间、数据源）写入 localStorage。
+- 固定以 USD（FxRatesAPI/Coinbase）或 EUR（Frankfurter 兜底时）为基准拉取整张汇率表，任意两种货币之间在本地做交叉换算，因此切换输入货币不需要重新请求。
+- 每次成功获取都会把快照（汇率、报价时刻、获取时间、实际生效的数据源）写入 localStorage（key 为 `fx.snapshot.v2`）。
 - **获取失败时不会清空已有数据**，界面继续用上一份快照换算，顶部状态栏改为「缓存数据 / 离线数据 · 最后更新于 …」。
-- 顶部显示的时间是**上一次成功拿到数据的时刻**，而不是页面打开的时间；旁边另外标注数据本身声明的汇率日期。
+- 顶部显示的时间是**上一次成功拿到数据的时刻**，而不是页面打开的时间；旁边另外标注数据本身声明的报价时间（实时源精确到分钟，Frankfurter 兜底时精确到天）。
 
 ## 常见修改
 
@@ -167,8 +168,11 @@ export const DEFAULT_ACTIVE_CODE: CurrencyCode = 'JPY'  // 默认输入行
 ├── src/
 │   ├── api/                       汇率数据源（可替换）
 │   │   ├── provider.ts            RateProvider 接口与错误类型
-│   │   ├── frankfurter.ts         默认实现
-│   │   └── rates.ts               当前使用的数据源
+│   │   ├── fxratesapi.ts          主数据源：实时中间价
+│   │   ├── coinbase.ts            备用数据源：实时中间价
+│   │   ├── frankfurter.ts         兜底数据源：ECB 日更参考汇率
+│   │   ├── chain.ts               降级链：按顺序尝试多个数据源
+│   │   └── rates.ts               当前使用的数据源（降级链组装）
 │   ├── components/                纯展示组件
 │   │   ├── Header.tsx             标题、更新状态、刷新 / 编辑 / 主题按钮
 │   │   ├── CurrencyList.tsx       货币列表 + 拖拽排序

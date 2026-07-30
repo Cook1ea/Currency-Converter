@@ -1,3 +1,4 @@
+import { SUPPORTED_CODES } from '../config/currencies'
 import type { CurrencyCode, RateSnapshot } from '../types'
 import { RateFetchError, type RateProvider } from './provider'
 
@@ -19,17 +20,6 @@ const ENDPOINTS = ['https://api.frankfurter.dev/v1/latest', 'https://api.frankfu
 
 /** 请求超时时间（ms），避免弱网下长时间挂起。 */
 const TIMEOUT_MS = 10_000
-
-/**
- * 数据源支持的币种（与 ECB 参考汇率一致，含基准货币 EUR 共 30 种）。
- * ECB 会随成员国加入欧元区调整该列表（例如保加利亚 2026 年启用欧元后 BGN 被移除），
- * 因此这里只作参考，实际以每次响应中的 rates 为准。
- */
-const SUPPORTED_CODES: readonly CurrencyCode[] = [
-  'AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
-  'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK',
-  'NZD', 'PHP', 'PLN', 'RON', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR',
-]
 
 interface FrankfurterResponse {
   amount: number

@@ -33,7 +33,7 @@ function dayOffsetLabel(timestamp: number, now: number): string | null {
 }
 
 /** 数据视为「过期」的阈值：超过这个时间未成功刷新就明确提示用户。 */
-export const STALE_AFTER_MS = 24 * HOUR
+export const STALE_AFTER_MS = 1 * HOUR
 
 export interface StatusTextOptions {
   snapshot: RateSnapshot | null
@@ -82,9 +82,16 @@ export function formatUpdatedStatus({
   return `${Math.floor(elapsed / HOUR)} 小时前更新 · ${clock}`
 }
 
-/** 汇率数据本身声明的日期（ECB 公布日），与获取时间不同。 */
+/**
+ * 汇率数据本身的报价时间说明。
+ * 实时数据源带有具体报价时刻（rateTimestamp），展示到分钟；
+ * 日更数据源（如 ECB 参考汇率）只有公布日期，展示到天。
+ */
 export function formatRateDate(snapshot: RateSnapshot | null): string {
   if (!snapshot) return ''
+  if (snapshot.rateTimestamp !== undefined) {
+    return `${formatClock(snapshot.rateTimestamp)} 实时报价`
+  }
   const [year, month, day] = snapshot.rateDate.split('-')
   if (!year || !month || !day) return snapshot.rateDate
   return `${Number(month)}月${Number(day)}日汇率`

@@ -10,7 +10,7 @@
  *   - 跨域请求（汇率 API）：不拦截，直接走网络
  */
 
-const CACHE_VERSION = 'v1'
+const CACHE_VERSION = 'v2'
 const CACHE_NAME = `fx-shell-${CACHE_VERSION}`
 
 // sw.js 所在目录即部署的 base 路径，兼容 GitHub Pages 子路径
